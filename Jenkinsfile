@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        docker { image 'docker:latest' }  // Runs pipeline in a Docker container
-    }
+    agent any  // Use the Jenkins host directly
     stages {
         stage('Build') {
             steps {
