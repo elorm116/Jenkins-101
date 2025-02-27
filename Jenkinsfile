@@ -1,5 +1,5 @@
 pipeline {
-    agent any  // Use the Jenkins host directly
+    agent any
     stages {
         stage('Build') {
             steps {
@@ -10,7 +10,7 @@ pipeline {
             steps {
                 sh 'docker stop my-app || true'
                 sh 'docker rm my-app || true'
-                sh 'docker run -d --name my-app -p 3000:3000 my-app:latest'
+                sh 'docker run -d --name my-app -p 3001:3000 my-app:latest'
             }
         }
     }
