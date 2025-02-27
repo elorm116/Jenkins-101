@@ -11,7 +11,6 @@ pipeline {
                 sh 'docker stop my-app || true'
                 sh 'docker rm my-app || true'
                 sh 'docker run -d --name my-app -p 3000:3000 my-app:latest'
-                // Removed 'docker run my-app:latest' - see note below
             }
         }
     }
