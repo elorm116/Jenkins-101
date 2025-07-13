@@ -105,10 +105,10 @@ pipeline {
                             sleep 10
                             
                             # Check if app is responding
-                            curl -f http://host.docker.internal:5000/health
+                            curl -f http://192.168.64.4:5000/health
                             
                             # Check main page
-                            curl -f http://host.docker.internal:5000/
+                            curl -f http://192.168.64.4:5000/
                         '''
                         echo '✅ Health check passed!'
                     } catch (Exception e) {
