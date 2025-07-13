@@ -53,9 +53,9 @@ pipeline {
                 echo '📦 Packaging application...'
                 sh '''
                     mkdir -p dist
-                    cp app.py dist/
-                    cp requirements.txt dist/
-                    cp deploy.sh dist/
+                    cp my-python-app/app.py dist/
+                    cp my-python-app/requirements.txt dist/
+                    cp my-python-app/deploy.sh dist/
                     ls -la dist/
                 '''
                 archiveArtifacts artifacts: 'dist/**/*', fingerprint: true
@@ -75,7 +75,7 @@ pipeline {
                             cd /tmp/python-app-deploy
                             
                             # Install dependencies in deployment environment
-                            pip install -r requirements.txt
+                            pip install -r my-python-app/requirements.txt
                             
                             # Make deploy script executable
                             chmod +x deploy.sh
