@@ -33,9 +33,11 @@ pipeline {
         stage('Run Tests') {
             steps {
                 echo '🧪 Running tests...'
-                sh 'python -m pytest test_app.py -v'
-            }
+                dir('my-python-app') {
+            sh 'python -m pytest test_app.py -v'
         }
+    }
+}
         
         stage('Build') {
             steps {
