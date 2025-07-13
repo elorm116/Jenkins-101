@@ -105,7 +105,7 @@ pipeline {
                             sleep 10
                             
                             # Check if app is responding
-                            curl -f http://192.168.64.4/health
+                            curl -f http://192.168.64.4:5000/health
                             
                             # Check main page
                             curl -f http://192.168.64.4:5000/
