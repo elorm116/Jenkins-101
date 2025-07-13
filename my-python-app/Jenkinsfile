@@ -41,11 +41,12 @@ pipeline {
         
         stage('Build') {
             steps {
-                echo '🏗️ Building application...'
-                sh 'python -m py_compile app.py'
-                echo 'Build completed successfully!'
-            }
+                 echo '🏗️ Building application...'
+                 dir('my-python-app') {
+            sh 'python -m py_compile app.py'
         }
+    }
+}
         
         stage('Package') {
             steps {
