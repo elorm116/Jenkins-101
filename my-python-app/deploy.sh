@@ -13,7 +13,7 @@ sleep 5
 # Check if app is running
 if curl -s http://192.168.64.4:5000/health > /dev/null; then
     echo "✅ App deployed successfully!"
-    echo "🌐 App is running at: http://localhost:5000"
+    echo "🌐 App is running at: http://192.168.64.4:5000"
 else
     echo "❌ Deployment failed!"
     exit 1
