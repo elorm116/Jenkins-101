@@ -1,0 +1,154 @@
+pipeline {
+    agent {
+        docker {
+            image 'python:3.9'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+    
+    environment {
+        APP_NAME = 'my-python-app'
+        DEPLOY_HOST = '192.168.64.4'
+        DEPLOY_PORT = '5000'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo '📦 Checking out code...'
+                git branch: 'main', url: 'https://github.com/elorm116/Jenkins-101'
+                sh 'ls -la'
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                echo '📋 Installing Python dependencies...'
+                sh 'pip install --upgrade pip'
+                sh 'pip install -r requirements.txt'
+                sh 'pip install pytest'  // For testing
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                echo '🧪 Running tests...'
+                sh 'python -m pytest test_app.py -v'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                echo '🏗️ Building application...'
+                sh 'python -m py_compile app.py'
+                echo 'Build completed successfully!'
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                echo '📦 Packaging application...'
+                sh '''
+                    mkdir -p dist
+                    cp app.py dist/
+                    cp requirements.txt dist/
+                    cp deploy.sh dist/
+                    ls -la dist/
+                '''
+                archiveArtifacts artifacts: 'dist/**/*', fingerprint: true
+            }
+        }
+        
+        stage('Deploy to Localhost') {
+            steps {
+                echo '🚀 Deploying to localhost...'
+                script {
+                    try {
+                        // Copy files to deployment directory
+                        sh '''
+                            # Create deployment directory
+                            mkdir -p /tmp/python-app-deploy
+                            cp -r dist/* /tmp/python-app-deploy/
+                            cd /tmp/python-app-deploy
+                            
+                            # Install dependencies in deployment environment
+                            pip install -r requirements.txt
+                            
+                            # Make deploy script executable
+                            chmod +x deploy.sh
+                            
+                            # Deploy the application
+                            ./deploy.sh
+                        '''
+                        
+                        echo '✅ Deployment completed successfully!'
+                        echo '🌐 Application is running at: http://192.168.64.4:5000'
+                        
+                    } catch (Exception e) {
+                        echo "❌ Deployment failed: ${e.getMessage()}"
+                        currentBuild.result = 'FAILURE'
+                    }
+                }
+            }
+        }
+        
+        stage('Health Check') {
+            steps {
+                echo '🏥 Performing health check...'
+                script {
+                    try {
+                        sh '''
+                            # Wait for app to be ready
+                            sleep 10
+                            
+                            # Check if app is responding
+                            curl -f http://192.168.64.4:5000/health
+                            
+                            # Check main page
+                            curl -f http://192.168.64.4:5000/
+                        '''
+                        echo '✅ Health check passed!'
+                    } catch (Exception e) {
+                        echo "❌ Health check failed: ${e.getMessage()}"
+                        currentBuild.result = 'FAILURE'
+                    }
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo '🧹 Cleaning up...'
+            sh 'ls -la'
+        }
+        success {
+            echo '''
+            🎉 Pipeline completed successfully!
+            
+            📋 Summary:
+            ✅ Code checked out
+            ✅ Dependencies installed
+            ✅ Tests passed
+            ✅ Application built
+            ✅ Deployment successful
+            ✅ Health check passed
+            
+            🌐 Your app is running at: http://192.168.64.4:5000
+            📊 Check the application logs at: /tmp/python-app-deploy/app.log
+            '''
+        }
+        failure {
+            echo '''
+            ❌ Pipeline failed!
+            
+            🔍 Check the console output for errors.
+            📋 Common issues:
+            - Git repository URL incorrect
+            - Dependencies not found
+            - Tests failing
+            - Port 5000 already in use
+            '''
+        }
+    }
+}
